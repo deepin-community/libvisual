@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+export GETTEXT_PACKAGE=libvisual-0.4
+
+%:
+	dh $@ --with autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-static
+
+override_dh_installdocs:
+	dh_installdocs -A AUTHORS NEWS README TODO

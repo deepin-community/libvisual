@@ -1,0 +1,279 @@
+libvisual (0.4.0-17) unstable; urgency=medium
+
+  * debian/tests/control:
+    - Depends on build-essential instead of g++, the cross-test autopkgtest
+      environment only knows how to handle the first one
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 26 Feb 2020 23:08:01 +0100
+
+libvisual (0.4.0-16) unstable; urgency=medium
+
+  * QA upload.
+  * Set Debian QA Group as maintainer. (see: #921622)
+  * debian/control:
+      - Added 'Rules-Requires-Root: no' to source stanza.
+      - Bumped Standards-Version to 4.5.0.
+  * debian/copyright: updated packaging copyright years.
+  * debian/salsa-ci.yml: added to provide CI tests for Salsa.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Mon, 24 Feb 2020 17:26:02 -0300
+
+libvisual (0.4.0-15) unstable; urgency=medium
+
+  * Using new DH level format. Consequently:
+      - debian/compat: removed.
+      - debian/control: changed from 'debhelper' to 'debhelper-compat' in
+        Build-Depends field.
+  * debian/control: bumped Standards-Version to 4.3.0.
+  * debian/copyright: updated packaging copyright years.
+  * debian/libvisual-0.4-dev.install: reverted the path for include/ directory.
+    I will use a symlink to fix the problem pointed in 0.4.0-13 revision. Thanks
+    to Tim Müller <t.i.m@zen.co.uk>. (Closes: #917898)
+  * debian/libvisual-0.4-dev.links: added to create a symlink as a workaround to
+    fix the include path called by each header file.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Fri, 18 Jan 2019 00:28:02 -0200
+
+libvisual (0.4.0-14) unstable; urgency=medium
+
+  * New upstream homepage and download site. Consequently, updated the
+    following files:
+      - debian/control
+      - debian/copyright
+      - debian/watch
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Thu, 29 Nov 2018 13:15:14 -0200
+
+libvisual (0.4.0-13) unstable; urgency=medium
+
+  * debian/control: removed 'Multi-Arch: same' from libvisual-0.4-dev binary to
+    fix a multiarch conflict for lvconfig.h file over several architectures. For
+    details, see https://wiki.debian.org/MultiArch/Hints#file-conflict
+    (Closes: #897344)
+  * debian/libvisual-0.4-dev.install: fixed the path for include/ directory.
+    The last debian/tests/test.cpp file shown a packaging error.
+  * debian/libvisual-0.4-0.symbols: added Build-Depends-Package field.
+  * debian/README.source: added to explain about a multiarch issue.
+  * debian/tests/test.cpp: using libvisual.h in test to get more comprehensive
+    results.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Sun, 04 Nov 2018 22:13:39 -0200
+
+libvisual (0.4.0-12) unstable; urgency=medium
+
+  [ Joao Eriberto Mota Filho ]
+  * Migrated DH level to 11.
+  * debian/control: bumped Standards-Version to 4.2.1.
+  * debian/copyright:
+      - Added rights for Ondřej Nový.
+      - Updated packaging copyright years.
+  * debian/patches/95_fix-FTCBFS.patch: added to avoid a FTCBFS. (see #884798)
+  * debian/tests/*: added to perform a trivial test.
+
+  [ Ondřej Nový ]
+  * debian/copyright: Use https protocol in Format field.
+  * debian/control: Set Vcs-* to salsa.debian.org.
+  * debian/watch: Use https protocol.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Fri, 02 Nov 2018 23:50:22 -0300
+
+libvisual (0.4.0-11) unstable; urgency=medium
+
+  * debian/control:
+      - Added a Multi-Arch field. Thanks to Francois Gouget <fgouget@free.fr>
+        and Manuel A. Fernandez Montecelo" <manuel.montezelo@gmail.com>.
+        (Closes: #862264)
+      - Bumped Standards-Version to 4.1.1.
+      - Removed no longer needed build dependency dh-autoreconf.
+  * debian/copyright: updated packaging copyright years.
+  * debian/patches/90_update-DE-translation.patch: updates the German
+    translation provided by 60_add_german_translation.patch. The same author
+    for both patches. So, thanks again to Chris Leick <c.leick@vollbio.de>.
+    (Closes: #871838)
+  * debian/source/options: updated to allow changes in all .gmo files.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Sat, 11 Nov 2017 16:51:31 -0200
+
+libvisual (0.4.0-10) unstable; urgency=medium
+
+  * debian/copyright: little adjustment around the main upstream email address.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Sat, 12 Nov 2016 20:15:03 -0200
+
+libvisual (0.4.0-9) unstable; urgency=medium
+
+  * Bumped DH level to 10.
+  * debian/control:
+      - Bumped Standards-Version to 3.9.8.
+      - Updated the Vcs-* fields to use https instead of http and git.
+  * debian/copyright: updated the packaging copyright years.
+  * debian/patches/:
+      - Added the .patch suffix to all patches.
+      - Added 80_fix_spelling.patch to fix a spelling error in final binary.
+  * debian/watch: bumped to version 4.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Mon, 10 Oct 2016 01:42:23 +0000
+
+libvisual (0.4.0-8) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Mon, 07 Sep 2015 13:48:44 -0300
+
+libvisual (0.4.0-7) experimental; urgency=medium
+
+  * New maintainer. Thanks to all previous people that have helped this
+      package. (Closes: #646655)
+  * Created the symbols file. The debian/libvisual-0.4-0.shlibs file was
+      removed.
+  * debian/control:
+      - Added the Vcs-* fields.
+      - Bumped Standards-Version to 3.9.6.
+      - Changing the libvisual-0.4-plugins from Recommends to Suggests field
+        in libvisual-0.4-0 binary. (Closes: #768428)
+      - Rearranged the short and long descriptions.
+      - Removed the no longer needed Replaces field from libvisual-0.4-dev
+        binary.
+  * debian/copyright: updated all data.
+  * debian/patches/:
+      - Renamed all patches:
+          ~ 01_x86_fxsr_magic_fix to 10_fix_x86_fxsr_magic.
+          ~ 02_redefine_fix to 20_fix_redefine.
+          ~ 03_configure_fix to 30_fix_configure.
+          ~ Werror=format-security-fix to 40_fix_format_security_error.
+          ~ fix-spelling-errors to 50_fix-spelling-errors.
+          ~ 99_add_german_translation.patch to 60_add_german_translation.
+      - Updated all previous headers in all patches.
+      - Added the 70_fix_some_GCC_warnings patch to provide some fixes.
+  * debian/rules:
+      - Added DEB_BUILD_MAINT_OPTIONS variable to improve the GCC hardening.
+      - Added the override_dh_installdocs target to install some files in
+        all packages.
+  * debian/source/options: added to keep the de.gmo file, provided by
+      60_add_german_translation patch after the first build.
+  * debian/watch: improved.
+  * Reviewed the *.install files.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Sat, 05 Sep 2015 14:54:09 -0300
+
+libvisual (0.4.0-6) unstable; urgency=medium
+
+  * QA upload.
+  * Add po/de.po. Thanks to Chris Leick. Closes: #509208.
+    Minor errors in po file corrected by me.
+
+ -- Helge Kreutzmann <debian@helgefjell.de>  Sat, 11 Oct 2014 19:43:38 +0200
+
+libvisual (0.4.0-5) unstable; urgency=low
+
+  * QA upload.
+  * Added debian/watch.
+  * Updated debian/control:
+    - added homepage field
+    - fixed lintian warning package-needs-versioned-debhelper-build-depends 9
+  * Updated debian/rules:
+    fixed broken names of translation files. (Closes: #646964)
+  * Added file debian/patches/fix-spelling-errors.
+  * Updated files debian/patches/0*_fix:
+    fixed lintian notes quilt-patch-missing-description.
+  * Updated debian/copyright:
+    file was rewritten in according to Copyright format 1.0.
+  * Bumped Standards-Version to 3.9.3.
+
+ -- Boris Pek <tehnick-8@mail.ru>  Wed, 20 Jun 2012 22:42:45 +0300
+
+libvisual (0.4.0-4) unstable; urgency=low
+
+  * QA upload, orphaning package; see #646655.
+  * Drop incorrect Vcs-* fields, which point at an upstream tree, not a
+    package tree.
+  * Drop unused build-dependency on chrpath.
+  * debian/rules: fix dh_auto_configure handling to use a proper override
+    rule.
+  * Bump debian/compat to 9 for hardening and multiarch support.
+  * Mark the runtime package Multi-Arch: same.
+  * refresh debian/patches/01_x86_fxsr_magic_fix, to not embed ../ in the
+    path name.  Closes: #608784.
+  * Use dh-autoreconf instead of relying on an autogenerated patch;
+    otherwise, this breaks down if autoconf *is* available in the build
+    environment.  Closes: #643199.
+  * Also build-depend on autopoint, needed by this package.
+  * Add missing build-dependency on pkg-config.
+  * debian/patches/Werror=format-security-fix: Fixes for -Werror=format-
+    security.
+  * Bump shlibdeps to account for the changed plugin path, and declare a
+    Breaks: on pre-multiarch versions of libvisual-0.4-plugins.
+  * Standards-Version 3.9.2.
+
+ -- Steve Langasek <vorlon@debian.org>  Wed, 26 Oct 2011 01:34:43 +0000
+
+libvisual (0.4.0-3) unstable; urgency=low
+
+  * Acknowledge NMU for lv_cpu.c fix. Thanks
+  * Fixed Maintainer field email address
+  * Updated Packaging to source 3.0 (quilt) format and
+    Moved direct source edits from NMU to patches.
+  * Added patch from Ubuntu for inline redefine fix.
+  * Very old config.sub and config.guess replaced
+
+ -- Brandon Holtsclaw <me@brandonholtsclaw.com>  Sun, 02 May 2010 05:19:31 -0500
+
+libvisual (0.4.0-2.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * libvisual/lv_cpu.c: remove X86_FXSR_MAGIC guard (not defined anywhere).
+    (Closes: #456856).
+
+ -- Pierre Habouzit <madcoder@debian.org>  Sun, 16 Mar 2008 14:49:11 +0100
+
+libvisual (0.4.0-2) unstable; urgency=low
+
+  * NMU ACK. Thanks
+  * Bump standard version to 3.7.2
+  * Maintainer changed (Closes: #451212)
+
+ -- Brandon Holtsclaw <brandon@imbrandon.com>  Fri, 23 Nov 2007 07:14:53 +0000
+
+libvisual (0.4.0-1.1) unstable; urgency=high
+
+  * NMU
+  * Disable altivec detection code, it breaks gstreamer on machines without
+    altivec.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 14 Jan 2007 14:26:45 +0100
+
+libvisual (0.4.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Create directories to quell warnings.  (Closes: 355020)
+
+ -- David Schleef <ds@schleef.org>  Fri, 19 May 2006 16:43:33 -0700
+
+libvisual (0.2.0-4) unstable; urgency=low
+
+  * Remove -mmx from CFLAGS (Closes #349479), and fix asm code to
+    compile.
+
+ -- David Schleef <ds@schleef.org>  Wed, 25 Jan 2006 23:26:03 -0800
+
+libvisual (0.2.0-3) unstable; urgency=low
+
+  * Fix the build problems on gcc-4.0 and drop gcc-3.4 dependency.
+    (Closes: #337480, #343005)
+  * Fix spelling in description. (Closes: #334466)
+  * Move libvisual0.2 to section: libs (duh) (Closes: #349296)
+
+ -- David Schleef <ds@schleef.org>  Sun, 22 Jan 2006 17:36:25 -0800
+
+libvisual (0.2.0-2) unstable; urgency=low
+
+  * Fix build problem on powerpc (Closes: #333070)  From Alberto
+    Ruffato.
+
+ -- David Schleef <ds@schleef.org>  Mon, 10 Oct 2005 18:11:52 -0700
+
+libvisual (0.2.0-1) unstable; urgency=low
+
+  * New package
+
+ -- David Schleef <ds@schleef.org>  Wed, 22 Jun 2005 16:03:26 -0700
