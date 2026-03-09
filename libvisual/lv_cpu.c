@@ -50,7 +50,18 @@
 #endif
 
 #if defined(VISUAL_OS_LINUX)
+#if defined(VISUAL_ARCH_POWERPC)
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+
+#include <linux/auxvec.h>
+#include <asm/cputable.h>
+#else /* VISUAL_ARCH_POWERPC */
 #include <signal.h>
+#endif
 #endif
 
 #if defined(VISUAL_OS_WIN32)
@@ -76,7 +87,7 @@ static int cpuid (unsigned int ax, unsigned int *p);
 
 /* The sigill handlers */
 #if defined(VISUAL_ARCH_X86) //x86 (linux katmai handler check thing)
-#if defined(VISUAL_OS_LINUX) && defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
+#if defined(VISUAL_OS_LINUX) && defined(_POSIX_SOURCE)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
 	/* Both the "xorps %%xmm0,%%xmm0" and "divps %xmm0,%%xmm1"
@@ -109,7 +120,7 @@ static void sigfpe_handler_sse( int signal, struct sigcontext sc )
 	}
 }
 #endif
-#endif /* VISUAL_OS_LINUX && _POSIX_SOURCE && X86_FXSR_MAGIC */
+#endif /* VISUAL_OS_LINUX && _POSIX_SOURCE */
 
 #if defined(VISUAL_OS_WIN32)
 LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
@@ -154,6 +165,46 @@ static void check_os_altivec_support( void )
 	if (err == 0)
 		if (has_vu != 0)
 			__lv_cpu_caps.hasAltiVec = 1;
+#elif defined (VISUAL_OS_LINUX)
+	static int available = -1;
+	int new_avail = 0;
+	char fname[64];
+	unsigned long buf[64];
+	ssize_t count;
+	pid_t pid;
+	int fd, i;
+
+	if (available != -1)
+		return;
+
+	pid = getpid();
+	snprintf(fname, sizeof(fname)-1, "/proc/%d/auxv", pid);
+
+	fd = open(fname, O_RDONLY);
+	if (fd < 0)
+		goto out;
+more:
+	count = read(fd, buf, sizeof(buf));
+	if (count < 0)
+		goto out_close;
+
+	for (i=0; i < (count / sizeof(unsigned long)); i += 2) {
+		if (buf[i] == AT_HWCAP) {
+			new_avail = !!(buf[i+1] & PPC_FEATURE_HAS_ALTIVEC);
+			goto out_close;
+		} else if (buf[i] == AT_NULL) {
+			goto out_close;
+		}
+	}
+
+	if (count == sizeof(buf))
+		goto more;
+out_close:
+	close(fd);
+out:
+	available = new_avail;
+	if (available)
+		__lv_cpu_caps.hasAltiVec = 1;
 #else /* !VISUAL_OS_DARWIN */
 	/* no Darwin, do it the brute-force way */
 	/* this is borrowed from the libmpeg2 library */

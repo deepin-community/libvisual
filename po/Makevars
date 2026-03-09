@@ -1,7 +1,7 @@
 # Makefile variables for PO directory in any package using GNU gettext.
 
 # Usually the message domain is the same as the package name.
-DOMAIN = $(GETTEXT_PACKAGE)
+DOMAIN = libvisual-0.4
 
 # These two variables depend on the location of this directory.
 subdir = po
@@ -34,8 +34,13 @@ COPYRIGHT_HOLDER = Dennis Smit.
 # It can be your email address, or a mailing list address where translators
 # can write to without being subscribed, or the URL of a web page through
 # which the translators can contact you.
-MSGID_BUGS_ADDRESS = http://libvisual.sf.net
+MSGID_BUGS_ADDRESS = https://github.com/Libvisual/libvisual/issues/
 
 # This is the list of locale categories, beyond LC_MESSAGES, for which the
 # message catalogs shall be used.  It is usually empty.
 EXTRA_LOCALE_CATEGORIES =
+
+# This target is meant to simplify invokation of make, nothing more
+.PHONY: update-pot
+update-pot:
+	$(MAKE) $(DOMAIN).pot-update

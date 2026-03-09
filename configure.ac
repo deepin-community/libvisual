@@ -4,11 +4,11 @@ AC_PREREQ(2.57)
 dnl Version numbers
 m4_define([libvisual_version_major], [0])
 m4_define([libvisual_version_minor], [4])
-m4_define([libvisual_version_micro], [0])
+m4_define([libvisual_version_micro], [2])
 
 m4_define([libvisual_version], [libvisual_version_major.libvisual_version_minor.libvisual_version_micro])
 
-AC_INIT([Libvisual Library], [libvisual_version], [synap@nerds-incorporated.org], [libvisual])
+AC_INIT([Libvisual Library], [libvisual_version], [https://github.com/Libvisual/libvisual/issues], [libvisual], [https://github.com/Libvisual/libvisual])
 AM_INIT_AUTOMAKE([1.7.0 dist-bzip2])
 
 dnl TODO: Add these into lv_config.h (or maybe lv_version.h)
@@ -20,7 +20,7 @@ LIBVISUAL_VERSION=libvisual_version
 LIBVISUAL_VERSION_SUFFIX="$LIBVISUAL_VERSION_MAJOR.$LIBVISUAL_VERSION_MINOR"
 AC_SUBST(LIBVISUAL_VERSION_SUFFIX)
 
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
 AC_CANONICAL_HOST
 
@@ -94,14 +94,12 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
 AC_DISABLE_STATIC
-AC_LIBTOOL_WIN32_DLL
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+LT_INIT([dlopen win32-dll])
 
-AC_PATH_PROG(PKG_CONFIG, [pkg-config], [no])
-if test x$PKG_CONFIG = xno ; then
-  AC_MSG_WARN([*** pkg-config not found. See http://www.freedesktop.org/software/pkgconfig/.
-	       *** You will need pkg-config to compile against Libvisual Library])
+PKG_PROG_PKG_CONFIG
+if test x$PKG_CONFIG = x ; then
+  AC_MSG_ERROR([*** pkg-config not found. See http://www.freedesktop.org/software/pkgconfig/.
+                  *** You will need pkg-config to compile against Libvisual Library])
 fi
 if $PKG_CONFIG --atleast-pkgconfig-version 0.14 ; then
   :
@@ -111,38 +109,35 @@ fi
 
 # Checks for header files.
 AC_HEADER_DIRENT
-AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h sys/types.h stdlib.h string.h sys/time.h unistd.h sched.h sys/sched.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
 
 AC_MSG_CHECKING(for ISO C99 varargs macros in C)
-AC_TRY_COMPILE([],[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
 		int a(int p1, int p2, int p3);
 		#define call_a(...) a(1,__VA_ARGS__)
 		call_a(2,3);
-		],lv_have_iso_c_varargs=yes,lv_have_iso_c_varargs=no)
+		])],[lv_have_iso_c_varargs=yes],[lv_have_iso_c_varargs=no])
 AC_MSG_RESULT($lv_have_iso_c_varargs)
 
 AC_MSG_CHECKING(for GNUC varargs macros)
-AC_TRY_COMPILE([],[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
 		int a(int p1, int p2, int p3);
 		#define call_a(params...) a(1,params)
 		call_a(2,3);
-		],lv_have_gnuc_varargs=yes,lv_have_gnuc_varargs=no)
+		])],[lv_have_gnuc_varargs=yes],[lv_have_gnuc_varargs=no])
 AC_MSG_RESULT($lv_have_gnuc_varargs)
 
 AC_C_BIGENDIAN(bigendian=yes, bigendian=no, )
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
-AC_CHECK_FUNCS([gettimeofday usleep nanosleep select memset sqrt strdup strndup sysconf])
+AC_CHECK_FUNCS([gettimeofday usleep nanosleep select strdup strndup sysconf])
 
 AC_CHECK_LIB([dl], [dlsym], [LIBS="-ldl $LIBS"],
 	     AC_MSG_WARN([*** You need dlsym() to make use of Libvisual.]))
@@ -155,7 +150,7 @@ AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [GETTEXT package name])
 AC_DEFINE_UNQUOTED(LOCALEDIR, "${prefix}/share/locale", [String catalog location])
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.14.1])
+AM_GNU_GETTEXT_VERSION([0.19])
 
 dnl -------------------------------
 dnl Check for native thread support
@@ -165,6 +160,7 @@ dnl
 dnl Test program for basic POSIX threads functionality (taken from Glib)
 dnl
 m4_define([lv_thread_test],[
+#include <stdlib.h>
 #include <pthread.h> 
 int check_me = 0;
 void* func(void* data) {check_me = 42; return &check_me;}
@@ -191,8 +187,8 @@ AIX_COMPILE_INFO="AIX's C compiler needs to be called by a different name, when
 		with the right compiler. Ususally just '_r' is appended 
 		to the compiler name."
 
-AC_ARG_ENABLE([enable_threads],
-  AC_HELP_STRING([--enable-threads],
+AC_ARG_ENABLE([threads],
+  AS_HELP_STRING([--enable-threads],
 		[Turn on basic thread support @<:@default=enabled@:>@]),
 		[enable_threads=$enableval],
 		[enable_threads=yes])
@@ -209,15 +205,15 @@ if test x$enable_threads = xyes; then
 		;;
 	esac
   if test "x$have_threads" = xnone; then
-    AC_TRY_COMPILE([#include <pthread.h>],
-		[pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;],
-		have_threads=posix)
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <pthread.h>],
+                                       [pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;])],
+                      [have_threads=posix],[])
   fi
   if test "x$have_threads" = xnone; then
-    AC_TRY_COMPILE([#include <pthread.h>],
-		[pthread_mutex_t m; 
-		pthread_mutex_init (&m, pthread_mutexattr_default);],
-		have_threads=dce)
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <pthread.h>],
+                                       [pthread_mutex_t m;
+                                        pthread_mutex_init (&m, pthread_mutexattr_default);])],
+                      [have_threads=dce],[])
   fi
   if test "x$have_threads" = xnone; then
     PKG_CHECK_MODULES(GTHREAD2, gthread-2.0 >= 2.2.0, [have_gthread2="yes"], [have_gthread2="no"])
@@ -273,12 +269,12 @@ else
 		LIBS="$add_thread_lib $lv_save_LIBS"
 		
 		AC_MSG_CHECKING(for pthread_create/pthread_join$IN)
-		AC_TRY_RUN(lv_thread_test($defattr),
-                                  lv_result=yes,
-                                  lv_result=no,
-                                  [AC_LINK_IFELSE(lv_thread_test($defattr),
-                                                  lv_result=yes,
-                                                  lv_result=no)])
+		AC_RUN_IFELSE([AC_LANG_SOURCE([lv_thread_test($defattr)])],
+		              [lv_result=yes],
+		              [lv_result=no],
+		              [AC_LINK_IFELSE([AC_LANG_SOURCE([lv_thread_test($defattr)])],
+		                              [lv_result=yes],
+		                              [lv_result=no])])
                 AC_MSG_RESULT($lv_result)
 			
               	if test "$lv_result" = "yes" ; then
@@ -373,13 +369,50 @@ AC_SUBST(VISUAL_LIBS)
 dnl ******************************
 dnl Arguments to specify certain features.
 dnl ******************************
+AC_ARG_ENABLE([lv-tool],
+            AS_HELP_STRING([--disable-lv-tool],
+                           [Do not build lv-tool @<:@default=enabled@:>@]),
+           [lv_tool_enabled=$enableval],
+           [lv_tool_enabled=yes])
+AC_MSG_CHECKING([wheter to build tool programs])
+if test x$lv_tool_enabled = xyes ; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_ARG_ENABLE([examples],
+            AS_HELP_STRING([--disable-examples],
+                           [Do not build example programs @<:@default=enabled@:>@]),
+           [examples=$enableval],
+           [examples=yes])
+AC_MSG_CHECKING([wheter to build example programs])
+if test x$examples = xyes ; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+if test  x$lv_tool_enabled = xyes -o x$examples = xyes ; then
+  # Find SDL 1.x.x
+  # On success, this will set and substitute SDL_CFLAGS and SDL_LIBS
+  PKG_CHECK_MODULES([SDL], [sdl >= 1.2.0], [], [
+    AC_MSG_ERROR([*** SDL 1.2.x not installed - please install first])
+  ])
+  if test x$examples = xyes ; then
+    AC_SUBST([EXAMPLES], ['simplesdl morphsdl'])
+  fi
+  if test x$lv_tool_enabled = xyes ; then
+    AC_SUBST([TOOLS_LV_TOOL], ['lv-tool-0.4'])
+  fi
+fi
 
 dnl ******************************
 dnl Debugging stuff 
 dnl ******************************
 DEBUG_CFLAGS=""
 AC_ARG_ENABLE([profiling],
-  AC_HELP_STRING([--enable-profiling],
+  AS_HELP_STRING([--enable-profiling],
 		[Enable emision of profile data to be used by gprof @<:@default=disabled@:>@]),
 		[profiling=$enableval],
 		[profiling=no])
@@ -396,7 +429,7 @@ else
 fi
 
 AC_ARG_ENABLE([debug],
-            AC_HELP_STRING([--enable-debug],
+            AS_HELP_STRING([--enable-debug],
                            [Enable debug @<:@default=disabled@:>@]),
 	    [debug=$enableval],
 	    [debug=no])
@@ -410,10 +443,10 @@ if test x$debug = xyes; then
     lv_save_CFLAGS=$CFLAGS
     CFLAGS="$CFLAGS -Wno-unused-variable"
     AC_MSG_CHECKING([whether gcc version is greater than 2.95])
-    AC_TRY_COMPILE([#include <stdlib.h>],
-		   [exit(0);],
-		   [lv_gcc_gt_2_95=yes],
-		   [lv_gcc_gt_2_95=no])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <stdlib.h>],
+                                       [exit(0);])],
+                      [lv_gcc_gt_2_95=yes],
+                      [lv_gcc_gt_2_95=no])
     CFLAGS=$lv_save_CFLAGS
     if test x$lv_gcc_gt_2_95 = xyes ; then
       AC_MSG_RESULT([yes])
@@ -428,7 +461,7 @@ fi
 AC_SUBST(DEBUG_CFLAGS)
 
 AC_ARG_ENABLE([extra-optimization],
-           AC_HELP_STRING([--enable-extra-optimization],
+           AS_HELP_STRING([--enable-extra-optimization],
                           [Enable extra optimizations @<:@default=disabled@:>@]),
            [extra_opt=$enableval],
            [extra_opt=no])
@@ -450,7 +483,7 @@ else
 fi
 
 AC_ARG_ENABLE([fast-fp-rng],
-           AC_HELP_STRING([--enable-fast-fp-rng],
+           AS_HELP_STRING([--enable-fast-fp-rng],
                           [Enable faster random floating point generator (enabled by default if --enable-extra-optimization is passed) ]),
            [fastfprng=$enableval],
            [fastfprng=maybe])
@@ -780,6 +813,7 @@ echo >>$outfile
    lv_alpha=$lv_alpha
    lv_sparc=$lv_sparc
    lv_ix86=$lv_ix86
+   lv_x86_64=$lv_x86_64
    lv_powerpc=$lv_powerpc
    lv_arch_unknown=$lv_arch_unknown
 
@@ -816,11 +850,13 @@ esac
 ])
 				    
 AC_CONFIG_FILES([
-m4/Makefile
+po/Makevars
 po/Makefile.in
 Makefile
 libvisual.pc
 libvisual/Makefile
+examples/Makefile
+tools/lv-tool/Makefile
 ])
 #
 # For now this are not included in the package
